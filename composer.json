@@ -1,0 +1,22 @@
+{
+    "name": "muqiuren/nacos-php",
+    "description": "nacos的php客户端",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Hatch\\Nacos\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "hatch",
+            "email": "964547735@qq.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.1",
+        "guzzlehttp/guzzle": "^7.7",
+        "monolog/monolog": "^2.9",
+        "ext-json": "*"
+    }
+}
