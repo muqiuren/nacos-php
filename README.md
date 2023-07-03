@@ -11,6 +11,71 @@
 3. 现已支持获取和监听配置
 4. 后续积极开发支持
 
+### 安装
+
+```powershell
+composer require muqiuren/nacos-php
+```
+
+### 使用
+
+1. 获取配置
+
+```php
+use Hatch\Nacos\NacosClient;
+
+$options = [
+    // nacos服务端地址
+    'host' => '127.0.0.1',
+    // nacos服务端端口
+    'port' => 8848,
+    // 命名空间id
+    'namespace_id' => '1e7b3de6-7edb-4329-9184-46582480063b',
+    // 配置id
+    'data_id' => 'php_env_config',
+    // 配置组
+    'group' => 'test',
+    // nacos用户名
+    'username' => 'admin',
+    // nacos密码
+    'password' => 'admin',
+];
+
+$client = new NacosClient($options);
+// 获取配置
+$conf = $client->configs->get();
+var_dump(conf);
+```
+
+2. 监听配置
+
+```php
+use Hatch\Nacos\NacosClient;
+
+$options = [
+    // nacos服务端地址
+    'host' => '127.0.0.1',
+    // nacos服务端端口
+    'port' => 8848,
+    // 命名空间id
+    'namespace_id' => '1e7b3de6-7edb-4329-9184-46582480063b',
+    // 配置id
+    'data_id' => 'php_env_config',
+    // 配置组
+    'group' => 'test',
+    // nacos用户名
+    'username' => 'admin',
+    // nacos密码
+    'password' => 'admin',
+    // 自动保存的文件地址
+    'save_config_path' => '.env',
+];
+
+$client = new NacosClient($options);
+// 启动监听，会阻塞当前进程
+$client->configs->listen();
+```
+
 ### TODO
 
 - [ ] 增强异常处理与容错
