@@ -73,7 +73,9 @@ $options = [
 
 $client = new NacosClient($options);
 // 启动监听，会阻塞当前进程
-$client->configs->listen();
+$client->configs->listen(function($newMd5) {
+    var_dump($newMd5);
+});
 ```
 
 ### TODO

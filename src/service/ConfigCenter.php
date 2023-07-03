@@ -54,12 +54,13 @@ class ConfigCenter extends BaseService
 
     /**
      * 监听配置
+     * @param callable|null $callback
      * @param string $data_id
      * @param string $group
      * @param string $content_md5
      * @param string $tenant
      */
-    public function listen(string $data_id = '', string $group = '', string $content_md5 = '', string $tenant = '')
+    public function listen(callable $callback = null, string $data_id = '', string $group = '', string $content_md5 = '', string $tenant = '')
     {
         $timeout = 30;
         $params = [
@@ -100,7 +101,9 @@ class ConfigCenter extends BaseService
 
             $response = $this->httpClient->request($url, 'POST', $options);
             if ($response) {
-                $this->syncConfig($listenerKey);
+                $newMd5 = $this->syncConfig($listenerKey);
+
+                is_callable($callback) && $callback($newMd5);
             }
         } while(true);
     }
@@ -108,16 +111,17 @@ class ConfigCenter extends BaseService
     /**
      * 同步配置
      * @param string $listenerKey
+     * @return string
      * @throws AuthException
      * @throws RequestException
      */
-    private function syncConfig(string $listenerKey)
+    private function syncConfig(string $listenerKey): string
     {
         $params = $this->listenerMap[$listenerKey];
         $content = $this->get($params['data_id'], $params['group'], $params['tenant']);
         if (!$content) {
             sleep(2);
-            return;
+            return $params['md5'];
         }
         $contentMd5 = md5($content);
         if (!empty(self::$save_config_path)) {
@@ -132,6 +136,8 @@ class ConfigCenter extends BaseService
             $contentMd5 . self::WORD_SEPARATOR,
             $params['tenant'] . self::LINE_SEPARATOR
         );
+
+        return $contentMd5;
     }
 
     /**
