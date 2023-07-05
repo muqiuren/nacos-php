@@ -3,6 +3,7 @@ namespace Hatch\Nacos\Service;
 
 use GuzzleHttp\RequestOptions;
 use Hatch\Nacos\Exception\AuthException;
+use Hatch\Nacos\Exception\BadRequestException;
 use Hatch\Nacos\Exception\RequestException;
 
 class ConfigCenter extends BaseService
@@ -49,7 +50,12 @@ class ConfigCenter extends BaseService
         }
 
         $url = $this->buildRequestUrl('/cs/configs', $query);
-        return $this->httpClient->request($url);
+        $result = $this->httpClient->request($url);
+        if ($result['code'] != Constant::HTTP_OK) {
+            throw new BadRequestException('[Get Config]:The http status code is ' . $result['code']);
+        }
+
+        return $result['body'];
     }
 
     /**
@@ -99,10 +105,12 @@ class ConfigCenter extends BaseService
                 $options[RequestOptions::FORM_PARAMS][self::LISTENER_CONFIG] = $this->listenerMap[$listenerKey][self::LISTENER_CONFIG];
             }
 
-            $response = $this->httpClient->request($url, 'POST', $options);
-            if ($response) {
+            $result = $this->httpClient->request($url, 'POST', $options);
+            if ($result['code'] != Constant::HTTP_OK) {
+                new BadRequestException('[Get Config]:The http status code is ' . $result['code']);
+            }
+            else if ($result['body']) {
                 $newMd5 = $this->syncConfig($listenerKey);
-
                 is_callable($callback) && $callback($newMd5);
             }
         } while(true);

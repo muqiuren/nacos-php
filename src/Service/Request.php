@@ -43,15 +43,21 @@ class Request extends Singleton
      * @param string $method
      * @param array $options
      * @return mixed
-     * @throws RequestException
      */
     public function request(string $url, string $method = 'GET', array $options = [])
     {
         try {
             $response = self::$client->request($method, $url, $options);
-            return $response->getBody()->getContents();
+            return [
+                'code' => $response->getStatusCode(),
+                'body' => $response->getBody()->getContents()
+            ];
         } catch (GuzzleException | Exception $e) {
-            throw new RequestException($e->getMessage());
+            new RequestException($e);
+            return [
+                'code' => Constant::HTTP_BAD_REQUEST,
+                'body' => '',
+            ];
         }
     }
 

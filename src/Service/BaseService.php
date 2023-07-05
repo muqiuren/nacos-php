@@ -4,7 +4,6 @@ namespace Hatch\Nacos\Service;
 
 use GuzzleHttp\RequestOptions;
 use Hatch\Nacos\Exception\AuthException;
-use Hatch\Nacos\Exception\RequestException;
 
 abstract class BaseService
 {
@@ -72,7 +71,7 @@ abstract class BaseService
      * @param string $endpoint
      * @param array $query
      * @return string
-     * @throws AuthException|RequestException
+     * @throws AuthException
      */
     protected function buildRequestUrl(string $endpoint, array &$query = []): string
     {
@@ -91,7 +90,7 @@ abstract class BaseService
     /**
      * 获取访问令牌
      * @return mixed
-     * @throws AuthException|RequestException
+     * @throws AuthException
      */
     protected function getAccessToken()
     {
@@ -104,7 +103,7 @@ abstract class BaseService
 
     /**
      * 登录
-     * @throws AuthException|RequestException
+     * @throws AuthException
      */
     private function login()
     {
@@ -115,14 +114,15 @@ abstract class BaseService
             ]
         ];
         $response = $this->httpClient->request($this->getRequestUrl('/auth/login'), 'POST', $options);
-        $result = json_decode($response, true);
+
+        $result = json_decode($response['body'], true);
         if (!isset($result['accessToken']) || !isset($result['tokenTtl'])) {
             throw new AuthException('[Login Error]:' . $response);
         }
 
         $this->tokenInfo = [
-            'access_token' => $result['accessToken'],
-            'ttl' => time() + $result['tokenTtl'] - 5,
+            'access_token' => $result['accessToken'] ?? '',
+            'ttl' => time() + ($result['tokenTtl'] ?? 0) - 5
         ];
     }
 }

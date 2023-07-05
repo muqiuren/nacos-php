@@ -21,7 +21,7 @@ class Logger extends Singleton
         $dateFormat = 'Y-m-d H:i:s.u';
         $output = "[%datetime%] %channel% %level_name% %message% %context%\n";
         $formatter = new LineFormatter($output, $dateFormat);
-        $handler = new StreamHandler('log/runtime.log', LoggerService::DEBUG);
+        $handler = new StreamHandler('nacos_php_runtime.log', LoggerService::DEBUG);
         $handler->setFormatter($formatter);
         self::$logger->pushHandler($handler);
     }

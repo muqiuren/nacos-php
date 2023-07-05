@@ -85,8 +85,8 @@ $client->configs->listen(function($newMd5) {
 
 ### TODO
 
-- [ ] 增强异常处理与容错
-- [ ] 增强日志输出
+- [x] 增强异常处理与容错
+- [x] 增强日志输出
 - [ ] Open Api接口对接
 - [ ] 接入单元测试
 - [ ] 提供更多示例

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Hatch\Nacos\Exception;
 
-class AuthException extends BaseException
+class BadRequestException extends RequestException
 {
     public function __construct(string $message)
     {

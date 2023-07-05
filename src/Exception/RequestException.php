@@ -1,14 +1,9 @@
 <?php
+declare(strict_types=1);
+
 namespace Hatch\Nacos\Exception;
 
-use Hatch\Nacos\Service\Logger;
-use Throwable;
-
-class RequestException extends \Exception
+class RequestException extends BaseException
 {
-    public function __construct($message = "", $code = 0, Throwable $previous = null)
-    {
-        parent::__construct($message, $code, $previous);
-        (Logger::getInstance())->record($message);
-    }
+
 }
