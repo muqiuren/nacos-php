@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use Exception;
+use Hatch\Nacos\Exception\BadRequestException;
 use Hatch\Nacos\Exception\RequestException;
 
 class Request extends Singleton
@@ -48,16 +49,15 @@ class Request extends Singleton
     {
         try {
             $response = self::$client->request($method, $url, $options);
-            return [
-                'code' => $response->getStatusCode(),
-                'body' => $response->getBody()->getContents()
-            ];
+            $statusCode = $response->getStatusCode();
+
+            if ($statusCode != Constant::HTTP_OK) {
+                throw new BadRequestException('[Get Config]:The http status code is ' . $statusCode);
+            }
+            return $response->getBody()->getContents();
         } catch (GuzzleException | Exception $e) {
             new RequestException($e);
-            return [
-                'code' => Constant::HTTP_BAD_REQUEST,
-                'body' => '',
-            ];
+            return '';
         }
     }
 

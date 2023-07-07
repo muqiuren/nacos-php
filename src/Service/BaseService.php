@@ -88,6 +88,18 @@ abstract class BaseService
     }
 
     /**
+     * 构建请求配置
+     * @param array $options
+     * @return array
+     */
+    protected function buildRequestOptions(array $options = []): array
+    {
+        return array_merge([
+            RequestOptions::TIMEOUT => self::$timeout,
+        ], $options);
+    }
+
+    /**
      * 获取访问令牌
      * @return mixed
      * @throws AuthException
@@ -114,8 +126,7 @@ abstract class BaseService
             ]
         ];
         $response = $this->httpClient->request($this->getRequestUrl('/auth/login'), 'POST', $options);
-
-        $result = json_decode($response['body'], true);
+        $result = json_decode($response, true);
         if (!isset($result['accessToken']) || !isset($result['tokenTtl'])) {
             throw new AuthException('[Login Error]:' . $response);
         }

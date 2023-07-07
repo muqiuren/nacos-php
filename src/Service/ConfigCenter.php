@@ -50,12 +50,7 @@ class ConfigCenter extends BaseService
         }
 
         $url = $this->buildRequestUrl('/cs/configs', $query);
-        $result = $this->httpClient->request($url);
-        if ($result['code'] != Constant::HTTP_OK) {
-            throw new BadRequestException('[Get Config]:The http status code is ' . $result['code']);
-        }
-
-        return $result['body'];
+        return $this->httpClient->request($url);
     }
 
     /**
@@ -92,13 +87,13 @@ class ConfigCenter extends BaseService
         $formParam[self::LISTENER_CONFIG] = $configStr;
         $this->listenerMap[$listenerKey] = $params + $formParam;
         $url = $this->buildRequestUrl('/cs/configs/listener');
-        $options = [
+        $options = $this->buildRequestOptions([
             RequestOptions::TIMEOUT => self::$timeout + $timeout,
             RequestOptions::FORM_PARAMS => $formParam,
             RequestOptions::HEADERS => [
                 'Long-Pulling-Timeout' => $timeout * 1000
             ],
-        ];
+        ]);
         do {
             $this->log->record('long pull...');
             if (isset($this->listenerMap[$listenerKey])) {
@@ -106,10 +101,8 @@ class ConfigCenter extends BaseService
             }
 
             $result = $this->httpClient->request($url, 'POST', $options);
-            if ($result['code'] != Constant::HTTP_OK) {
-                new BadRequestException('[Get Config]:The http status code is ' . $result['code']);
-            }
-            else if ($result['body']) {
+
+            if ($result) {
                 $newMd5 = $this->syncConfig($listenerKey);
                 is_callable($callback) && $callback($newMd5);
             }
@@ -156,5 +149,116 @@ class ConfigCenter extends BaseService
     private function getListenerKey(array $params): string
     {
         return implode(self::KEY_SEPARATOR, $params);
+    }
+
+    /**
+     * 发布配置
+     * @param string $content
+     * @param string $data_id
+     * @param string $group
+     * @param string $tenant
+     * @return mixed
+     * @throws AuthException
+     */
+    public function publish(string $content, string $data_id = '', string $group = '', string $tenant = '')
+    {
+        $params = [
+            'content' => $content,
+            'dataId' => $data_id ?: self::$data_id,
+            'group' => $group ?: self::$group,
+        ];
+
+        if ($tenant || self::$namespace_id) {
+            $params['tenant'] = $tenant ?: self::$namespace_id;
+        }
+
+        $url = $this->buildRequestUrl('/cs/configs');
+        $options = $this->buildRequestOptions([
+            RequestOptions::FORM_PARAMS => $params
+        ]);
+
+        return $this->httpClient->request($url, 'POST', $options);
+    }
+
+    /**
+     * 删除配置
+     * @param string $data_id
+     * @param string $group
+     * @param string $tenant
+     * @return mixed
+     * @throws AuthException
+     */
+    public function destroy(string $data_id = '', string $group = '', string $tenant = '')
+    {
+        $params = [
+            'dataId' => $data_id ?: self::$data_id,
+            'group' => $group ?: self::$group,
+        ];
+
+        if ($tenant || self::$namespace_id) {
+            $params['tenant'] = $tenant ?: self::$namespace_id;
+        }
+
+        $url = $this->buildRequestUrl('/cs/configs');
+        $options = $this->buildRequestOptions([
+            RequestOptions::FORM_PARAMS => $params
+        ]);
+
+        return $this->httpClient->request($url, 'DELETE', $options);
+    }
+
+    /**
+     * 查询历史版本
+     * @param int $page
+     * @param int $page_size
+     * @param string $data_id
+     * @param string $group
+     * @param string $tenant
+     * @return mixed|string
+     * @throws AuthException
+     */
+    public function history(int $page = 1, int $page_size = 100, string $data_id = '', string $group = '', string $tenant = '')
+    {
+        $query = [
+            'search' => 'accurate',
+            'dataId' => $data_id ?: self::$data_id,
+            'group' => $group ?: self::$group,
+            'pageNo' => $page >= 1 ? $page : 1,
+            'pageSize' => ($page_size >= 1 && $page_size <= 500) ? $page_size : 100,
+        ];
+
+        if ($tenant || self::$namespace_id) {
+            $query['tenant'] = $tenant ?: self::$namespace_id;
+        }
+
+        $url = $this->buildRequestUrl('/cs/history', $query);
+        $options = $this->buildRequestOptions();
+        return $this->httpClient->request($url, 'GET', $options);
+    }
+
+    /**
+     * 查询历史版本详情
+     * @param int $nid
+     * @param string $data_id
+     * @param string $group
+     * @param string $tenant
+     * @return mixed|string
+     * @throws AuthException
+     */
+    public function historyInfo(int $nid, string $data_id = '', string $group = '', string $tenant = '')
+    {
+        $query = [
+            'nid' => $nid,
+            'dataId' => $data_id ?: self::$data_id,
+            'group' => $group ?: self::$group,
+        ];
+
+        if ($tenant || self::$namespace_id) {
+            $query['tenant'] = $tenant ?: self::$namespace_id;
+        }
+
+        $url = $this->buildRequestUrl('/cs/history', $query);
+        $options = $this->buildRequestOptions();
+        return $this->httpClient->request($url, 'GET', $options);
     }
 }
