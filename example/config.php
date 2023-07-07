@@ -52,6 +52,12 @@ $result = $client->configs->historyInfo(1);
 print_r($result);
 printLog('查询历史版本详情 END');
 
+// 查询配置上一版本信息
+printLog('查询配置上一版本信息 START');
+$result = $client->configs->historyPrevInfo(1);
+print_r($result);
+printLog('查询配置上一版本信息 END');
+
 // 监听配置
 printLog('监听配置 START');
 $client->configs->listen(function($newMd5) {

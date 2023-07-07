@@ -247,4 +247,30 @@ class ConfigCenter extends BaseService
         $options = $this->buildRequestOptions();
         return $this->httpClient->request($url, 'GET', $options);
     }
+
+    /**
+     * 查询配置上一版本信息
+     * @param int $id
+     * @param string $data_id
+     * @param string $group
+     * @param string $tenant
+     * @return mixed|string
+     * @throws AuthException
+     */
+    public function historyPrevInfo(int $id, string $data_id = '', string $group = '', string $tenant = '')
+    {
+        $query = [
+            'id' => $id,
+            'dataId' => $data_id ?: self::$data_id,
+            'group' => $group ?: self::$group,
+        ];
+
+        if ($tenant || self::$namespace_id) {
+            $query['tenant'] = $tenant ?: self::$namespace_id;
+        }
+
+        $url = $this->buildRequestUrl('/cs/history/previous', $query);
+        $options = $this->buildRequestOptions();
+        return $this->httpClient->request($url, 'GET', $options);
+    }
 }
