@@ -3,7 +3,6 @@ namespace Hatch\Nacos\Service;
 
 use GuzzleHttp\RequestOptions;
 use Hatch\Nacos\Exception\AuthException;
-use Hatch\Nacos\Exception\BadRequestException;
 use Hatch\Nacos\Exception\RequestException;
 
 class ConfigCenter extends BaseService
@@ -22,7 +21,6 @@ class ConfigCenter extends BaseService
      * @param string $tenant
      * @return mixed
      * @throws AuthException
-     * @throws RequestException
      */
     public function get(string $data_id = '', string $group = '', string $tenant = '')
     {
