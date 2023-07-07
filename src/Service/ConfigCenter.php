@@ -12,20 +12,6 @@ class ConfigCenter extends BaseService
     const WORD_SEPARATOR = "\x02";
     const KEY_SEPARATOR  = "\x03";
     const LISTENER_CONFIG = 'Listening-Configs';
-    /** @var string 获取配置 */
-    const API_GET_CONFIG =  '/cs/configs';
-    /** @var string 监听配置 */
-    const API_LISTENER_CONFIG =  '/cs/configs/listener';
-    /** @var string 发布配置 */
-    const API_POST_CONFIG =  '/cs/configs';
-    /** @var string 删除配置 */
-    const API_DELETE_CONFIG =  '/cs/configs';
-    /** @var string 查询历史版本 */
-    const API_GET_HISTORY =  '/cs/history?search=accurate';
-    /** @var string 查询历史版本详情 */
-    const API_GET_HISTORY_INFO =  '/cs/history';
-    /** @var string 查询配置上一版本信息 */
-    const API_GET_HISTORY_PREVIOUS =  '/cs/history/previous';
     /** @var array 监听者map */
     private $listenerMap = [];
 
