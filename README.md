@@ -1,5 +1,6 @@
 # Nacos的php客户端库
 
+[![PHP Version Require](http://poser.pugx.org/muqiuren/nacos-php/require/php)](https://packagist.org/packages/muqiuren/nacos-php)
 [![License](http://poser.pugx.org/muqiuren/nacos-php/license)](https://packagist.org/packages/muqiuren/nacos-php)
 [![Total Downloads](http://poser.pugx.org/muqiuren/nacos-php/downloads)](https://packagist.org/packages/muqiuren/nacos-php)
 [![Latest Stable Version](http://poser.pugx.org/muqiuren/nacos-php/v)](https://packagist.org/packages/muqiuren/nacos-php)
