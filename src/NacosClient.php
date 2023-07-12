@@ -17,7 +17,7 @@ class NacosClient
         'group' => '',
         'username' => '',
         'password' => '',
-        'timeout' => 3000
+        'timeout' => 3
     ];
 
     /** @var ConfigCenter 配置中心 */

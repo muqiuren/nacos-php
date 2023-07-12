@@ -43,16 +43,16 @@ class Request extends Singleton
      * @param string $url
      * @param string $method
      * @param array $options
-     * @return mixed
+     * @return string
      */
-    public function request(string $url, string $method = 'GET', array $options = [])
+    public function request(string $url, string $method = 'GET', array $options = []): string
     {
         try {
             $response = self::$client->request($method, $url, $options);
             $statusCode = $response->getStatusCode();
 
             if ($statusCode != Constant::HTTP_OK) {
-                throw new BadRequestException('[Get Config]:The http status code is ' . $statusCode);
+                throw new BadRequestException('The http status code is ' . $statusCode);
             }
             return $response->getBody()->getContents();
         } catch (GuzzleException | Exception $e) {
