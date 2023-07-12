@@ -70,7 +70,6 @@ class ConfigCenter extends BaseService
         $configStr = implode(self::WORD_SEPARATOR, array_values($params)) . self::LINE_SEPARATOR;
         $formParam[self::LISTENER_CONFIG] = $configStr;
         $this->listenerMap[$listenerKey] = $params + $formParam;
-        $url = $this->buildRequestUrl('/cs/configs/listener');
         $options = $this->buildRequestOptions([
             RequestOptions::TIMEOUT => self::$timeout + $timeout,
             RequestOptions::FORM_PARAMS => $formParam,
@@ -80,12 +79,12 @@ class ConfigCenter extends BaseService
         ]);
         do {
             $this->log->record('long pull...');
+            $url = $this->buildRequestUrl('/cs/configs/listener');
             if (isset($this->listenerMap[$listenerKey])) {
                 $options[RequestOptions::FORM_PARAMS][self::LISTENER_CONFIG] = $this->listenerMap[$listenerKey][self::LISTENER_CONFIG];
             }
 
             $result = $this->httpClient->request($url, 'POST', $options);
-
             if ($result) {
                 $newMd5 = $this->syncConfig($listenerKey);
                 is_callable($callback) && $callback($newMd5);
