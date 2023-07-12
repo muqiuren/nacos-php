@@ -4,7 +4,6 @@
 [![License](http://poser.pugx.org/muqiuren/nacos-php/license)](https://packagist.org/packages/muqiuren/nacos-php)
 [![Total Downloads](http://poser.pugx.org/muqiuren/nacos-php/downloads)](https://packagist.org/packages/muqiuren/nacos-php)
 [![Latest Stable Version](http://poser.pugx.org/muqiuren/nacos-php/v)](https://packagist.org/packages/muqiuren/nacos-php)
-[![Latest Unstable Version](http://poser.pugx.org/muqiuren/nacos-php/v/unstable)](https://packagist.org/packages/muqiuren/nacos-php)
 
 最近需要用到nacos，项目是php编写的，看了很多开源的轮子，要么不支持username&password模式，要么就是深度集成到框架中，要么就是各种乱七八糟的错误，所以打算自己接入[nacos](https://nacos.io/)。
 
