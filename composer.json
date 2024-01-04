@@ -14,7 +14,7 @@
         }
     ],
     "require": {
-        "php": "^7.1",
+        "php": ">=7.1",
         "guzzlehttp/guzzle": "^7.7",
         "monolog/monolog": "^2.9",
         "ext-json": "*"
