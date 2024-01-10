@@ -3,23 +3,24 @@ namespace Hatch\Nacos\Service;
 
 use GuzzleHttp\RequestOptions;
 use Hatch\Nacos\Exception\AuthException;
+use Hatch\Nacos\Exception\RequestException;
 use Hatch\Nacos\Exception\ValidateException;
 
 class ServerDiscover extends BaseService
 {
     /** @var string[] 允许参数 */
     private $all_allow_fields = [
-        'namespace_id' => 'string',
-        'weight' => 'float|int',
-        'enabled' => 'boolean',
-        'healthy' => 'boolean',
+        'namespaceId' => 'string',
+        'weight' => 'double|float|int',
+        'enabled' => 'boolean|string',
+        'healthy' => 'boolean|string',
         'metadata' => 'string',
-        'cluster_name' => 'string',
-        'group_name' => 'string',
-        'ephemeral' => 'boolean',
+        'clusterName' => 'string',
+        'groupName' => 'string',
+        'ephemeral' => 'boolean|string',
         'clusters' => 'string',
-        'healthy_only' => 'boolean',
-        'protect_threshold' => 'float|int',
+        'healthyOnly' => 'boolean',
+        'protectThreshold' => 'double|float|int',
         'selector' => 'string',
         'debug' => 'boolean',
     ];
@@ -33,7 +34,7 @@ class ServerDiscover extends BaseService
      */
     private function buildParams(array &$params, array $options, array $allow_fields = [])
     {
-        $allow_fields = $allow_fields ?: array_keys($this->all_allow_fields);
+        $allow_fields = $allow_fields ? array_flip($allow_fields) : array_keys($this->all_allow_fields);
         foreach ($options as $k => $v)
         {
             if (!isset($allow_fields[$k])) {
@@ -43,14 +44,14 @@ class ServerDiscover extends BaseService
             $type = gettype($v);
             $typeArr = explode('|', $this->all_allow_fields[$k]);
             if (!in_array($type, $typeArr)) {
-                throw new ValidateException(sprintf('The field [%s] type is incorrect, it must be of [%s] type', $k, $this->all_allow_fields[$k]));
+                throw new ValidateException(sprintf('The field [%s] type is incorrect, it must be of [%s] type, But is [%s]', $k, $this->all_allow_fields[$k], $type));
             }
 
             $params[$k] = $v;
         }
 
-        if (!isset($params['namespace_id']) && self::$namespace_id) {
-            $params['namespace_id'] = self::$namespace_id;
+        if (!isset($params['namespaceId']) && self::$namespace_id) {
+            $params['namespaceId'] = self::$namespace_id;
         }
     }
 
@@ -60,11 +61,12 @@ class ServerDiscover extends BaseService
      * @param string $ip
      * @param int $port
      * @param array $options
-     * @return mixed|string
+     * @return string
      * @throws AuthException
      * @throws ValidateException
+     * @throws RequestException
      */
-    public function registerInstance(string $service_name, string $ip, int $port, array $options = [])
+    public function registerInstance(string $service_name, string $ip, int $port, array $options = []): string
     {
         $params = [
             'serviceName' => $service_name,
@@ -73,8 +75,8 @@ class ServerDiscover extends BaseService
         ];
 
         $this->buildParams($params, $options, [
-            'namespace_id', 'weight', 'enabled', 'healthy',
-            'metadata', 'cluster_name', 'group_name', 'ephemeral',
+            'namespaceId', 'weight', 'enabled', 'healthy',
+            'metadata', 'clusterName', 'groupName', 'ephemeral',
         ]);
         $url = $this->buildRequestUrl('/ns/instance');
         $options = $this->buildRequestOptions([
@@ -90,11 +92,12 @@ class ServerDiscover extends BaseService
      * @param string $ip
      * @param int $port
      * @param array $options
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      * @throws ValidateException
      */
-    public function destroyInstance(string $service_name, string $ip, int $port, array $options = [])
+    public function destroyInstance(string $service_name, string $ip, int $port, array $options = []): string
     {
         $params = [
             'serviceName' => $service_name,
@@ -103,7 +106,7 @@ class ServerDiscover extends BaseService
         ];
 
         $this->buildParams($params, $options, [
-            'namespace_id', 'cluster_name', 'group_name', 'ephemeral'
+            'namespaceId', 'clusterName', 'groupName', 'ephemeral'
         ]);
         $url = $this->buildRequestUrl('/ns/instance');
         $options = $this->buildRequestOptions([
@@ -119,11 +122,12 @@ class ServerDiscover extends BaseService
      * @param string $ip
      * @param int $port
      * @param array $options
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      * @throws ValidateException
      */
-    public function updateInstance(string $service_name, string $ip, int $port, array $options = [])
+    public function updateInstance(string $service_name, string $ip, int $port, array $options = []): string
     {
         $params = [
             'serviceName' => $service_name,
@@ -131,8 +135,8 @@ class ServerDiscover extends BaseService
             'port' => $port,
         ];
         $this->buildParams($params, $options, [
-            'namespace_id', 'weight', 'enabled', 'healthy',
-            'metadata', 'cluster_name', 'group_name', 'ephemeral',
+            'namespaceId', 'weight', 'enabled', 'healthy',
+            'metadata', 'clusterName', 'groupName', 'ephemeral',
         ]);
         $url = $this->buildRequestUrl('/ns/instance');
         $options = $this->buildRequestOptions([
@@ -146,17 +150,18 @@ class ServerDiscover extends BaseService
      * 查询实例列表
      * @param string $service_name
      * @param array $options
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      * @throws ValidateException
      */
-    public function getInstanceList(string $service_name, array $options = [])
+    public function getInstanceList(string $service_name, array $options = []): string
     {
         $query = [
             'serviceName' => $service_name,
         ];
         $this->buildParams($query, $options, [
-            'group_name', 'namespace_id', 'clusters', 'healthy_only'
+            'groupName', 'namespaceId', 'clusters', 'healthyOnly'
         ]);
         $url = $this->buildRequestUrl('/ns/instance/list', $query);
         $options = $this->buildRequestOptions();
@@ -170,11 +175,12 @@ class ServerDiscover extends BaseService
      * @param string $ip
      * @param int $port
      * @param array $options
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      * @throws ValidateException
      */
-    public function getInstance(string $service_name, string $ip, int $port, array $options = [])
+    public function getInstance(string $service_name, string $ip, int $port, array $options = []): string
     {
         $query = [
             'serviceName' => $service_name,
@@ -182,7 +188,7 @@ class ServerDiscover extends BaseService
             'port' => $port,
         ];
         $this->buildParams($query, $options, [
-            'group_name', 'namespace_id', 'cluster', 'healthy_only', 'ephemeral'
+            'groupName', 'namespaceId', 'cluster', 'healthyOnly', 'ephemeral'
         ]);
         $url = $this->buildRequestUrl('/ns/instance', $query);
         $options = $this->buildRequestOptions();
@@ -193,29 +199,24 @@ class ServerDiscover extends BaseService
     /**
      * 发送实例心跳
      * @param string $service_name
-     * @param string $ip
-     * @param int $port
      * @param string $beat
      * @param array $options
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      * @throws ValidateException
      */
-    public function beat(string $service_name, string $ip, int $port, string $beat, array $options = [])
+    public function beat(string $service_name, string $beat, array $options = []): string
     {
-        $params = [
+        $query = [
             'serviceName' => $service_name,
-            'ip' => $ip,
-            'port' => $port,
             'beat' => $beat,
         ];
-        $this->buildParams($params, $options, [
-            'group_name', 'namespace_id', 'ephemeral'
+        $this->buildParams($query, $options, [
+            'groupName', 'namespaceId', 'ephemeral'
         ]);
-        $url = $this->buildRequestUrl('/ns/instance/beat');
-        $options = $this->buildRequestOptions([
-            RequestOptions::FORM_PARAMS => $params
-        ]);
+        $url = $this->buildRequestUrl('/ns/instance/beat', $query);
+        $options = $this->buildRequestOptions();
 
         return $this->httpClient->request($url, 'PUT', $options);
     }
@@ -224,17 +225,18 @@ class ServerDiscover extends BaseService
      * 创建服务
      * @param string $service_name
      * @param array $options
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      * @throws ValidateException
      */
-    public function createService(string $service_name, array $options = [])
+    public function createService(string $service_name, array $options = []): string
     {
         $params = [
             'serviceName' => $service_name,
         ];
         $this->buildParams($params, $options, [
-            'group_name', 'namespace_id', 'protect_threshold', 'metadata', 'selector'
+            'groupName', 'namespaceId', 'protectThreshold', 'metadata', 'selector'
         ]);
         $url = $this->buildRequestUrl('/ns/service');
         $options = $this->buildRequestOptions([
@@ -248,17 +250,18 @@ class ServerDiscover extends BaseService
      * 删除服务
      * @param string $service_name
      * @param array $options
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      * @throws ValidateException
      */
-    public function destroyService(string $service_name, array $options = [])
+    public function destroyService(string $service_name, array $options = []): string
     {
         $params = [
             'serviceName' => $service_name,
         ];
         $this->buildParams($params, $options, [
-            'group_name', 'namespace_id',
+            'groupName', 'namespaceId',
         ]);
         $url = $this->buildRequestUrl('/ns/service');
         $options = $this->buildRequestOptions([
@@ -272,17 +275,18 @@ class ServerDiscover extends BaseService
      * 修改服务
      * @param string $service_name
      * @param array $options
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      * @throws ValidateException
      */
-    public function updateService(string $service_name, array $options = [])
+    public function updateService(string $service_name, array $options = []): string
     {
         $params = [
             'serviceName' => $service_name,
         ];
         $this->buildParams($params, $options, [
-            'group_name', 'namespace_id', 'protect_threshold', 'metadata', 'selector',
+            'groupName', 'namespaceId', 'protectThreshold', 'metadata', 'selector',
         ]);
         $url = $this->buildRequestUrl('/ns/service');
         $options = $this->buildRequestOptions([
@@ -296,17 +300,18 @@ class ServerDiscover extends BaseService
      * 查询服务
      * @param string $service_name
      * @param array $options
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      * @throws ValidateException
      */
-    public function getService(string $service_name, array $options = [])
+    public function getService(string $service_name, array $options = []): string
     {
         $query = [
             'serviceName' => $service_name,
         ];
         $this->buildParams($query, $options, [
-            'group_name', 'namespace_id',
+            'groupName', 'namespaceId',
         ]);
         $url = $this->buildRequestUrl('/ns/service', $query);
         $options = $this->buildRequestOptions();
@@ -319,18 +324,19 @@ class ServerDiscover extends BaseService
      * @param int $page
      * @param int $page_size
      * @param array $options
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      * @throws ValidateException
      */
-    public function getServiceList(int $page = 1, int $page_size = 10, array $options = [])
+    public function getServiceList(int $page = 1, int $page_size = 10, array $options = []): string
     {
         $query = [
             'pageNo' => $page >= 1 ? $page : 1,
             'pageSize' => ($page_size >= 1 && $page_size <= 500) ? $page_size : 10,
         ];
         $this->buildParams($query, $options, [
-            'group_name', 'namespace_id',
+            'groupName', 'namespaceId',
         ]);
         $url = $this->buildRequestUrl('/ns/service/list', $query);
         $options = $this->buildRequestOptions();
@@ -340,10 +346,11 @@ class ServerDiscover extends BaseService
 
     /**
      * 查询系统开关
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      */
-    public function getSysSwitch()
+    public function getSysSwitch(): string
     {
         $url = $this->buildRequestUrl('/ns/operator/switches');
         $options = $this->buildRequestOptions();
@@ -356,11 +363,12 @@ class ServerDiscover extends BaseService
      * @param string $entry
      * @param string $value
      * @param array $options
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      * @throws ValidateException
      */
-    public function updateSysSwitch(string $entry, string $value, array $options = [])
+    public function updateSysSwitch(string $entry, string $value, array $options = []): string
     {
         $params = [
             'entry' => $entry,
@@ -379,10 +387,11 @@ class ServerDiscover extends BaseService
 
     /**
      * 查看系统当前数据指标
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      */
-    public function getSysMetrics()
+    public function getSysMetrics(): string
     {
         $url = $this->buildRequestUrl('/ns/operator/metrics');
         $options = $this->buildRequestOptions();
@@ -393,11 +402,12 @@ class ServerDiscover extends BaseService
     /**
      * 查看当前集群Server列表
      * @param array $options
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      * @throws ValidateException
      */
-    public function getClusterServices(array $options = [])
+    public function getClusterServices(array $options = []): string
     {
         $query = [];
         $this->buildParams($query, $options, [
@@ -411,10 +421,11 @@ class ServerDiscover extends BaseService
 
     /**
      * 查看当前集群leader
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      */
-    public function getClusterLeader()
+    public function getClusterLeader(): string
     {
         $url = $this->buildRequestUrl('/ns/raft/leader');
         $options = $this->buildRequestOptions();
@@ -429,11 +440,12 @@ class ServerDiscover extends BaseService
      * @param int $port
      * @param bool $healthy
      * @param array $options
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      * @throws ValidateException
      */
-    public function updateInstanceHealth(string $service_name, string $ip, int $port, bool $healthy, array $options = [])
+    public function updateInstanceHealth(string $service_name, string $ip, int $port, bool $healthy, array $options = []): string
     {
         $params = [
             'serviceName' => $service_name,
@@ -442,7 +454,7 @@ class ServerDiscover extends BaseService
             'healthy' => $healthy,
         ];
         $this->buildParams($params, $options, [
-            'namespace_id', 'group_name', 'cluster_name'
+            'namespaceId', 'groupName', 'clusterName'
         ]);
         $url = $this->buildRequestUrl('/ns/health/instance');
         $options = $this->buildRequestOptions([

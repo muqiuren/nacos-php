@@ -4,15 +4,17 @@ namespace Hatch\Nacos\Service;
 
 use GuzzleHttp\RequestOptions;
 use Hatch\Nacos\Exception\AuthException;
+use Hatch\Nacos\Exception\RequestException;
 
 class NamespaceCenter extends BaseService
 {
     /**
      * 查询命名空间列表
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      */
-    public function getList()
+    public function getList(): string
     {
         $url = $this->buildRequestUrl('/console/namespaces');
         $options = $this->buildRequestOptions();
@@ -25,10 +27,11 @@ class NamespaceCenter extends BaseService
      * @param string $namespace_id
      * @param string $namespace_name
      * @param string $namespace_desc
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      */
-    public function create(string $namespace_id, string $namespace_name, string $namespace_desc = '')
+    public function create(string $namespace_id, string $namespace_name, string $namespace_desc = ''): string
     {
         $params = [
             'customNamespaceId' => $namespace_id,
@@ -48,10 +51,11 @@ class NamespaceCenter extends BaseService
      * @param string $namespace_id
      * @param string $namespace_name
      * @param string $namespace_desc
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      */
-    public function update(string $namespace_id, string $namespace_name, string $namespace_desc = '')
+    public function update(string $namespace_id, string $namespace_name, string $namespace_desc = ''): string
     {
         $params = [
             'namespace' => $namespace_id,
@@ -69,10 +73,11 @@ class NamespaceCenter extends BaseService
     /**
      * 删除命名空间
      * @param string $namespace_id
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      */
-    public function destroy(string $namespace_id)
+    public function destroy(string $namespace_id): string
     {
         $params = [
             'namespaceId' => $namespace_id,

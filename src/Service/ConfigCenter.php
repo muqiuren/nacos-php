@@ -19,8 +19,9 @@ class ConfigCenter extends BaseService
      * @param string $data_id
      * @param string $group
      * @param string $tenant
-     * @return mixed
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      */
     public function get(string $data_id = '', string $group = '', string $tenant = '')
     {
@@ -44,6 +45,7 @@ class ConfigCenter extends BaseService
      * @param string $group
      * @param string $content_md5
      * @param string $tenant
+     * @throws AuthException|RequestException
      */
     public function listen(callable $callback = null, string $data_id = '', string $group = '', string $content_md5 = '', string $tenant = '')
     {
@@ -78,16 +80,20 @@ class ConfigCenter extends BaseService
             ],
         ]);
         do {
-            $this->log->record('long pull...');
-            $url = $this->buildRequestUrl('/cs/configs/listener');
-            if (isset($this->listenerMap[$listenerKey])) {
-                $options[RequestOptions::FORM_PARAMS][self::LISTENER_CONFIG] = $this->listenerMap[$listenerKey][self::LISTENER_CONFIG];
-            }
+            try {
+                $url = $this->buildRequestUrl('/cs/configs/listener');
+                if (isset($this->listenerMap[$listenerKey])) {
+                    $options[RequestOptions::FORM_PARAMS][self::LISTENER_CONFIG] = $this->listenerMap[$listenerKey][self::LISTENER_CONFIG];
+                }
 
-            $result = $this->httpClient->request($url, 'POST', $options);
-            if ($result) {
-                $newMd5 = $this->syncConfig($listenerKey);
-                is_callable($callback) && $callback($newMd5);
+                $result = $this->httpClient->request($url, 'POST', $options);
+                if ($result) {
+                    $newMd5 = $this->syncConfig($listenerKey);
+                    is_callable($callback) && $callback($newMd5);
+                }
+            } catch (RequestException | AuthException $e) {
+                $this->log->exception($e);
+                sleep(3);
             }
         } while(true);
     }
@@ -140,10 +146,11 @@ class ConfigCenter extends BaseService
      * @param string $data_id
      * @param string $group
      * @param string $tenant
-     * @return mixed
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      */
-    public function publish(string $content, string $data_id = '', string $group = '', string $tenant = '')
+    public function publish(string $content, string $data_id = '', string $group = '', string $tenant = ''): string
     {
         $params = [
             'content' => $content,
@@ -168,10 +175,11 @@ class ConfigCenter extends BaseService
      * @param string $data_id
      * @param string $group
      * @param string $tenant
-     * @return mixed
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      */
-    public function destroy(string $data_id = '', string $group = '', string $tenant = '')
+    public function destroy(string $data_id = '', string $group = '', string $tenant = ''): string
     {
         $params = [
             'dataId' => $data_id ?: self::$data_id,
@@ -197,10 +205,11 @@ class ConfigCenter extends BaseService
      * @param string $data_id
      * @param string $group
      * @param string $tenant
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      */
-    public function history(int $page = 1, int $page_size = 100, string $data_id = '', string $group = '', string $tenant = '')
+    public function history(int $page = 1, int $page_size = 100, string $data_id = '', string $group = '', string $tenant = ''): string
     {
         $query = [
             'search' => 'accurate',
@@ -225,10 +234,11 @@ class ConfigCenter extends BaseService
      * @param string $data_id
      * @param string $group
      * @param string $tenant
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      */
-    public function historyInfo(int $nid, string $data_id = '', string $group = '', string $tenant = '')
+    public function historyInfo(int $nid, string $data_id = '', string $group = '', string $tenant = ''): string
     {
         $query = [
             'nid' => $nid,
@@ -251,10 +261,11 @@ class ConfigCenter extends BaseService
      * @param string $data_id
      * @param string $group
      * @param string $tenant
-     * @return mixed|string
+     * @return string
      * @throws AuthException
+     * @throws RequestException
      */
-    public function historyPrevInfo(int $id, string $data_id = '', string $group = '', string $tenant = '')
+    public function historyPrevInfo(int $id, string $data_id = '', string $group = '', string $tenant = ''): string
     {
         $query = [
             'id' => $id,

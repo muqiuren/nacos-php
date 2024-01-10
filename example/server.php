@@ -69,7 +69,8 @@ printLog('查询实例详情 END');
 
 // 发送实例心跳
 printLog('发送实例心跳 START');
-$result = $client->servers->beat($testServiceName, $testServiceIp, $testServicePort, 'ping');
+// beat example: {"cluster":"DEFAULT","ip":"xxx","metadata":{},"port":xxx,"scheduled":true,"serviceName":"nacos-php","weight":1}
+$result = $client->servers->beat($testServiceName, json_encode(['ip' => $testServiceIp, 'port' => $testServicePort, 'serviceName' => $testServiceName]));
 print_r($result);
 printLog('发送实例心跳 END');
 

@@ -44,6 +44,7 @@ class Request extends Singleton
      * @param string $method
      * @param array $options
      * @return string
+     * @throws RequestException
      */
     public function request(string $url, string $method = 'GET', array $options = []): string
     {
@@ -56,8 +57,7 @@ class Request extends Singleton
             }
             return $response->getBody()->getContents();
         } catch (GuzzleException | Exception $e) {
-            new RequestException($e);
-            return '';
+            throw new RequestException($e);
         }
     }
 
